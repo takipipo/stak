@@ -1,0 +1,23 @@
+{
+  "name": "stak",
+  "version": "1.0.0",
+  "description": "STAK Service Repo",
+  "keywords": [
+    "inbox"
+  ],
+  "homepage": "https://github.com/muze-innovation/stak#readme",
+  "bugs": {
+    "url": "https://github.com/muze-innovation/stak/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muze-innovation/stak.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": "Muze Innovation",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

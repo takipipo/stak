@@ -10,7 +10,7 @@ Core Feature
 
 Message Custom Schema
 
-Message schema can be extended. Default schema is provided as following.
+Message schema can be extended. Default schema is provided as following. Each message is stored within specific **Tenant** represented by `tenant_key` and specific inbox represent by `inbox_key` default is "DEFAULT". These key information is omitted from the response payload to save transfer.
 
 ```json
 {
@@ -36,7 +36,7 @@ Message schema can be extended. Default schema is provided as following.
 }
 ```
 
-- Message can be group using categorization parameter such as `category`.
+- Message can be group using categorization parameter such as `category` this category is used to distinct message within the same **inbox**.
 - Message body can be custom json. Schema can be used to help speec up message parsing.
 
 # Invoking our APIs
@@ -59,7 +59,7 @@ To invoke these API you will need the `AdminApiKey` and `admin_id`
 ### Send Messages
 
 ```bash
-POST /stack/admin/v1/messages/post
+POST /stack/admin/v1/:tenant_key/:inbox_key/messages/post
 {
     "headers": {
         "host_system_id": string, // application's defined id.
@@ -93,7 +93,7 @@ Responses
 ### Redact Sent Message
 
 ```bash
-DELETE /stack/admin/v1/messages/redact
+DELETE /stack/admin/v1/:tenant_key/:inbox_key/messages/redact
 {
     "id": <message_id>
 }
@@ -127,7 +127,7 @@ Query last <limit> messages
 Request
 
 ```bash
-GET /stack/users/v1/messages/last/:limit?next=:next_token
+GET /stack/users/v1/:tenant_key/:inbox_key/messages/last/:limit?next=:next_token
 ```
 
 Responses
@@ -157,7 +157,7 @@ Mark specific messages as read.
 Request
 
 ```bash
-PUT /stack/users/v1/messages/read/
+PUT /stack/users/v1/:tenant_key/:inbox_key/messages/read/
 {
     "messages": [<message_id>, <message_id>], // maximum 50 messages.
 }
@@ -183,7 +183,7 @@ Mark specific messages as read.
 Request
 
 ```bash
-PUT /stack/users/v1/messages/read/
+PUT /stack/users/v1/:tenant_key/:inbox_key/messages/read/
 {
     "after": epoch, // epoch that will mark the earlier than this epoch as read.
 }
@@ -210,9 +210,20 @@ This design will save the message as follows to serve both query & redaction.
 
 ## Main Schema (Table)
 
-Table | Record Type | Partition Key               | Sort Key        | **Note**
-------|-------------|-----------------------------|-----------------|---------------------------------------
-Table | Message     | t#<tenant_key>u#<user_id>   | m#<message_id>  | Storing messages
-Table | Stats       | t#<tenant_key>u#<user_id>   | c#*             | Storing all unread messages count
-Table | Stats       | t#<tenant_key>u#<user_id>   | c#<category_id> | Storing unread messages count per category
+Table | Record Type | Partition Key                          | Sort Key        | **Note**
+------|-------------|----------------------------------------|-----------------|---------------------------------------
+Table | Message     | t#<tenant_key>U#<user_id>#<inbox_key>  | m#<message_id>  | Storing messages
+Table | Stats       | t#<tenant_key>U#<user_id>#<inbox_key>  | c#*             | Storing all unread messages count
+Table | Stats       | t#<tenant_key>U#<user_id>#<inbox_key>  | c#<category_id> | Storing unread messages count per category
 
+
+## Technnology Stack
+
+- monorepo
+- Lambda via Serverless (v3) Framework
+- TypeScript
+- Message Queue - SQS
+- Development Simulation
+    - using Serverless Offline
+    - LocalStack
+- Persistent: DynamoDB (Single Table Design)
