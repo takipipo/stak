@@ -39,6 +39,15 @@ Message schema can be extended. Default schema is provided as following. Each me
 - Message can be group using categorization parameter such as `category` this category is used to distinct message within the same **inbox**.
 - Message body can be custom json. Schema can be used to help speec up message parsing.
 
+## Inbox Configurations
+
+```json
+{
+    "title": string, // inbox's title.
+    "description": string, // inbox's description (title)
+}
+```
+
 # Invoking our APIs
 
 Stak offer 2 groups of APIs.
@@ -210,12 +219,15 @@ This design will save the message as follows to serve both query & redaction.
 
 ## Main Schema (Table)
 
-Table | Record Type | Partition Key                          | Sort Key        | **Note**
-------|-------------|----------------------------------------|-----------------|---------------------------------------
-Table | Message     | t#<tenant_key>U#<user_id>#<inbox_key>  | m#<message_id>  | Storing messages
-Table | Stats       | t#<tenant_key>U#<user_id>#<inbox_key>  | c#*             | Storing all unread messages count
-Table | Stats       | t#<tenant_key>U#<user_id>#<inbox_key>  | c#<category_id> | Storing unread messages count per category
+Table | Record Type  | Partition Key                          | Sort Key           | **Note**
+------|--------------|----------------------------------------|--------------------|---------------------------------------
+Table | Settings     | t#<tenant_key>                         | st#tenant_settings | Storing all tenant settings
+Table | Inbox Config | t#<tenant_key>                         | si#<inbox_key>     | Storing per inbox configs, including message's schema
+Table | Message      | t#<tenant_key>U#<user_id>#<inbox_key>  | m#<message_id>     | Storing messages
+Table | Stats        | t#<tenant_key>U#<user_id>#<inbox_key>  | c#*                | Storing all unread messages count
+Table | Stats        | t#<tenant_key>U#<user_id>#<inbox_key>  | c#<category_id>    | Storing unread messages count per category
 
+> IMPORTANT: `<tenant_key>`, `<user_id>`, and `<inbox_key>` MUST not include `#` sign.
 
 ## Technnology Stack
 
