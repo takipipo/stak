@@ -16,8 +16,8 @@ Message schema can be extended. Default schema is provided as following. Each me
 {
     "headers": {
         "id": string, // message id
-        "host_system_id": string |null, // custom id from host system
-        "category": string, // application's defined key, e.g. use this to derive icon?
+        "host_system_id": string | null, // custom id from host system
+        "category": string, // application's defined key, e.g. use this to derive icon.
         "sender": string, // message sender (`admin_id`)
         "audiences": {
             "kind": "users" | "everyone",
@@ -26,8 +26,9 @@ Message schema can be extended. Default schema is provided as following. Each me
         },
         "received": number, // epoch since message received into Stak system
         "delivered:" number, // epoch since message delivered into our database
-        "readat": number | null, // epoch when message was read
     },
+    "readat": number | null, // epoch when message was read
+    "expiredat": number, // epoch when message can be safely terminated from persistant storage (max=730d, default=inbox.ttl[type] | inbox.tll[default] | tenant.ttl | 30d)
     "message": {
         "title": string,
         "body": string | any // provide any message structure you need.
@@ -38,6 +39,7 @@ Message schema can be extended. Default schema is provided as following. Each me
 
 - Message can be group using categorization parameter such as `category` this category is used to distinct message within the same **inbox**.
 - Message body can be custom json. Schema can be used to help speec up message parsing.
+- Message has aging. The againg is provided for reducing unwanted data cost.
 
 ## Inbox Configurations
 
@@ -45,6 +47,10 @@ Message schema can be extended. Default schema is provided as following. Each me
 {
     "title": string, // inbox's title.
     "description": string, // inbox's description (title)
+    "ttl": {
+        "default": stirng, // duration in units of days, minutes, and seconds. e.g. 30d, 30m, 600s
+        "<type>": string // duration in units of days, minutes, and seconds.
+    }
 }
 ```
 
@@ -209,33 +215,15 @@ Responses
 }
 ```
 
-# Technical Implementation
-
-The service will make use of DynamoDB single-table design for low cost and high-latency persistent storage.
-
-This design will save the message as follows to serve both query & redaction.
-
-**IMPORTANT** Auto generate message id is a string that only valid when combined with uid to create uniquness of receipient. Meaning User A & User B would shared the same message id if message were sent in batch. However receipt marker is always dedicated per single user.
-
-## Main Schema (Table)
-
-Table | Record Type  | Partition Key                          | Sort Key           | **Note**
-------|--------------|----------------------------------------|--------------------|---------------------------------------
-Table | Settings     | t#<tenant_key>                         | st#tenant_settings | Storing all tenant settings
-Table | Inbox Config | t#<tenant_key>                         | si#<inbox_key>     | Storing per inbox configs, including message's schema
-Table | Message      | t#<tenant_key>U#<user_id>#<inbox_key>  | m#<message_id>     | Storing messages
-Table | Stats        | t#<tenant_key>U#<user_id>#<inbox_key>  | c#*                | Storing all unread messages count
-Table | Stats        | t#<tenant_key>U#<user_id>#<inbox_key>  | c#<category_id>    | Storing unread messages count per category
-
-> IMPORTANT: `<tenant_key>`, `<user_id>`, and `<inbox_key>` MUST not include `#` sign.
-
 ## Technnology Stack
 
 - monorepo
-- Lambda via Serverless (v3) Framework
+- Lambda via SAM
 - TypeScript
 - Message Queue - SQS
 - Development Simulation
     - using Serverless Offline
     - LocalStack
 - Persistent: DynamoDB (Single Table Design)
+
+Please read [implementation](/implementation.md) for the details.
