@@ -13,7 +13,7 @@ Table | Message      | t#<tenant_key>U#<user_id>#<inbox_key>  | m#<message_id>  
 Table | Message      | t#<tenant_key>G#$public#<inbox_key>    | m#<message_id>     | Storing public messages (same set of fields as per user messages without `readat` field).
 Table | Stats        | t#<tenant_key>U#<user_id>#<inbox_key>  | c#*                | Storing user messages count, read messages count { `published`: number, `read`: number }
 Table | Stats        | t#<tenant_key>G#$public#<inbox_key>    | c#*                | Storing all messages ever published count, expired messages count { `published`: number }
-Table | Stats        | t#<tenant_key>U#<user_id>#<inbox_key>  | c#<category_id>    | Storing unread messages count per category
+Table | Stats        | t#<tenant_key>U#<user_id>#<inbox_key>  | c#<category_key>   | Storing unread messages count per category
 
 Please see [Single Table Design](./single-table-design.md) for more information regarding the Key's design aspect.
 
@@ -33,10 +33,9 @@ Please see [Single Table Design](./single-table-design.md) for more information 
 ```json
 {
     "kind": "UM", // User Message
-    "headers": {
+    "audiences": {
         "id": string, // message id
         "host_system_id": string | null, // custom id from host system
-        "category": string, // application's defined key, e.g. use this to derive icon.
         "sender": string, // message sender (`admin_id`)
         "audiences": {
             "kind": "users" | "everyone",
@@ -48,6 +47,9 @@ Please see [Single Table Design](./single-table-design.md) for more information 
     },
     "readat": number | null, // epoch when message was read
     "expiredat": number, // epoch when message can be safely terminated from persistant storage (max=730d, default=inbox.ttl[type] | inbox.tll[default] | tenant.ttl | 30d)
+    "taxonomy": { // groupping conditioning
+        "category": string, // application's defined key, e.g. use this to derive icon.
+    },
     "message": {
         "title": string,
         "body": string | any // provide any message structure you need.
@@ -70,12 +72,17 @@ Read Receipt therefore is a light concept of receipt represent the mark of read.
 
 ```json
 {
+    "taxonomy": { // optional field.
+        "category": string, // this is a key for category.
+    },
     "readat": number, // this is now mandatory to deem itself as read receipt.
     "expiredat": number, // this is mandatory as read marker should be removed when expired.
 }
 ```
 
 This mark of read once exist in database it should add the `read` count in the users' [stats object](#stats-object). And hence once removed (due to `expiredat` or TTL) the `read` count must be deducted as well. (we achieve this via DynamoDB Stream)
+
+Upon marking as read we will need to set `taxonomy` and `expiredat` which derived the value from the original public message.
 
 ### Stats Object
 
@@ -231,12 +238,12 @@ Number of messages will be incremented per user's state, and per uses' group via
 Given a message.
 
 > UPDATE(t#<tenant_key>U#<user_id>#<inbox_key>, c#*) ADD published, 1
-> UPDATE(t#<tenant_key>U#<user_id>#<inbox_key>, c#<category_id>) ADD published, 1
+> UPDATE(t#<tenant_key>U#<user_id>#<inbox_key>, c#<category_key>) ADD published, 1
 
 ### Adding public message
 
 Given publishing a public message.
 
 > UPDATE(t#<tenant_key>U#<user_id>#<inbox_key>, c#*) ADD published, 1
-> UPDATE(t#<tenant_key>U#<user_id>#<inbox_key>, c#<category_id>) ADD published, 1
+> UPDATE(t#<tenant_key>U#<user_id>#<inbox_key>, c#<category_key>) ADD published, 1
 

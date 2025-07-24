@@ -78,7 +78,7 @@ The system uses a single DynamoDB table with the following key structure:
 | **Inbox Config** | `t#<tenant_key>` | `si#<inbox_key>` | Per-inbox settings and schema |
 | **Message** | `t#<tenant_key>U#<user_id>#<inbox_key>` | `m#<message_id>` | Individual user messages |
 | **Total Stats** | `t#<tenant_key>U#<user_id>#<inbox_key>` | `c#*` | Total unread count per user/inbox |
-| **Category Stats** | `t#<tenant_key>U#<user_id>#<inbox_key>` | `c#<category_id>` | Unread count per category |
+| **Category Stats** | `t#<tenant_key>U#<user_id>#<inbox_key>` | `c#<category_key>` | Unread count per category |
 
 ### Key Design Principles
 

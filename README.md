@@ -17,7 +17,6 @@ Message schema can be extended. Default schema is provided as following. Each me
     "headers": {
         "id": string, // message id
         "host_system_id": string | null, // custom id from host system
-        "category": string, // application's defined key, e.g. use this to derive icon.
         "sender": string, // message sender (`admin_id`)
         "audiences": {
             "kind": "users" | "everyone",
@@ -27,8 +26,11 @@ Message schema can be extended. Default schema is provided as following. Each me
         "received": number, // epoch since message received into Stak system
         "delivered:" number, // epoch since message delivered into our database
     },
+    "taxonomy": { // groupping conditions
+        "category": string, // application's defined key, e.g. use this to derive icon.
+    },
     "readat": number | null, // epoch when message was read
-    "expiredat": number, // epoch when message can be safely terminated from persistant storage (max=730d, default=inbox.ttl[type] | inbox.tll[default] | tenant.ttl | 30d)
+    "expiredat": number // epoch when message can be safely terminated from persistant storage (max=730d, default=inbox.ttl[type] | inbox.tll[default] | tenant.ttl | 30d)
     "message": {
         "title": string,
         "body": string | any // provide any message structure you need.
@@ -37,7 +39,7 @@ Message schema can be extended. Default schema is provided as following. Each me
 }
 ```
 
-- Message can be group using categorization parameter such as `category` this category is used to distinct message within the same **inbox**.
+- Message can be groupped using categorization parameter such as `category` this category is used to distinct message within the same **inbox**.
 - Message body can be custom json. Schema can be used to help speec up message parsing.
 - Message has aging. The againg is provided for reducing unwanted data cost.
 
@@ -78,13 +80,15 @@ POST /stack/admin/v1/:tenant_key/:inbox_key/messages/post
 {
     "headers": {
         "host_system_id": string, // application's defined id.
-        "category": string, // application's defined key, e.g. use this to derive icon?
         "audiences": { /** Same as Audience object on Message Schema */
             "kind": "users" | "everyone",
             "label": string, // label of users group if needed, This can be display in the message as well.
             "uids": string[], // List of `user_id` (only defined when "kind" == "users")
         },
-    }
+    },
+    "taxonomy": { // this is optional, setting this will scope down the category of the object will update the counting separately.
+        "category": string, // application's defined key, e.g. use this to derive icon?
+    },
     "message": {
         "title": string,
         "body": string | any // provide any message structure you need.
