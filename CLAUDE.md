@@ -9,17 +9,19 @@ Stak is an open-source inbox service application designed to handle mobile app m
 ## Development Commands
 
 ### Package Management
-- `npm install` - Install dependencies in the root
-- `cd packages/stak-core-sv && npm install` - Install dependencies for the core service
+- `npm install` - Install dependencies for all packages
+- `npm install -w packages/stak` - Install dependencies for the Lambda service
+- `npm install -w packages/shared` - Install dependencies for shared utilities
 
-### Serverless Deployment
-- `cd packages/stak-core-sv && npx serverless deploy` - Deploy the service to AWS
-- `cd packages/stak-core-sv && npx serverless deploy --stage dev` - Deploy to a specific stage
-- `cd packages/stak-core-sv && npx serverless remove` - Remove the deployed service
-
-### Local Development
-- Use Serverless Offline for local development simulation
+### Local Development & Testing
+- `npm run dev -w packages/stak` - Start SAM local API server
+- `npm run build -w packages/stak` - Build Lambda functions with SAM
+- `npm test -w packages/stak` - Run Jest unit tests
 - Use LocalStack for local AWS service simulation (as mentioned in README)
+
+### AWS Deployment
+- `cd packages/stak && sam deploy` - Deploy Lambda functions to AWS
+- `cd packages/stak && sam deploy --guided` - Interactive deployment configuration
 
 ## Architecture
 
@@ -27,22 +29,31 @@ Stak is an open-source inbox service application designed to handle mobile app m
 ```
 stak/
 ├── packages/
-│   └── stak-core-sv/        # Core serverless service
-│       ├── index.js         # Express app with DynamoDB integration
-│       ├── serverless.yml   # Serverless Framework configuration
-│       └── package.json     # Service dependencies
+│   ├── stak/                # Lambda entry point and AWS infrastructure
+│   │   ├── src/handlers/    # TypeScript Lambda handlers
+│   │   ├── template.yaml    # SAM template
+│   │   ├── buildspec.yml    # Build configuration
+│   │   └── package.json     # Lambda service dependencies
+│   └── shared/              # TypeScript ESM module for shared code
+│       ├── src/             # Shared utilities and business logic
+│       └── package.json     # Shared module dependencies
 ├── README.md               # Comprehensive API documentation
-└── package.json           # Root package configuration
+└── package.json           # Root monorepo configuration
 ```
 
-### Core Service (stak-core-sv)
-- **Framework**: Express.js wrapped with serverless-http
+### Lambda Service (packages/stak)
+- **Framework**: SAM (Serverless Application Model)
 - **Database**: DynamoDB with single-table design
 - **Runtime**: Node.js 18.x on AWS Lambda
+- **Build Tool**: esbuild for TypeScript compilation
 - **Dependencies**: 
   - `@aws-sdk/client-dynamodb` and `@aws-sdk/lib-dynamodb` for database operations
-  - `express` for HTTP handling
-  - `serverless-http` for Lambda integration
+  - Local `packages/shared` module for business logic
+
+### Shared Module (packages/shared)
+- **Purpose**: TypeScript ESM module for shared code and utilities
+- **Export Format**: ES Modules
+- **Contains**: Database layer, business logic, types, and utilities
 
 ### Database Schema (DynamoDB Single Table)
 - **Partition Key Pattern**: `t#<tenant_key>U#<user_id>#<inbox_key>`

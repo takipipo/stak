@@ -6,6 +6,7 @@
     "inbox"
   ],
   "workspaces": [
+    "packages/shared",
     "packages/stak"
   ],
   "homepage": "https://github.com/muze-innovation/stak#readme",

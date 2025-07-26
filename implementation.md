@@ -3,6 +3,32 @@ Technical Implementation
 
 The service will make use of DynamoDB single-table design for low cost, and low-latency persistent storage. This design will save the message as follows to serve both query & redaction while keep counting efficient. The schema is only addressing the core logic of how the persistent is being made. Some of the aspect can be enhanced with the help or Redis. e.g. Settings, and Stats Object.
 
+## Package Architecture
+
+The project follows a monorepo structure with dedicated packages:
+
+### packages/stak
+- **Purpose**: Lambda entry point and AWS infrastructure
+- **Runtime**: Node.js 18.x on AWS Lambda  
+- **Framework**: SAM (Serverless Application Model)
+- **Build Tool**: esbuild for TypeScript compilation
+- **Testing**: Jest with experimental ESM support
+- **Contains**:
+  - TypeScript handlers in `src/handlers/`
+  - SAM template (`template.yaml`)
+  - Build configuration (`buildspec.yml`)
+  - Unit tests in `__tests__/`
+
+### packages/shared
+- **Purpose**: TypeScript ESM module for shared code and utilities
+- **Export Format**: ES Modules
+- **Contains**:
+  - Database access layer and DynamoDB operations
+  - Business logic and domain models
+  - Shared types and interfaces
+  - Common utilities and helpers
+  - Validation schemas
+
 ## Main Schema (Table)
 
 Table | Record Type  | Partition Key                          | Sort Key           | **Note**

@@ -1,3 +1,4 @@
 node_modules
 .serverless
 packages/*/.aws-sam
+packages/shared/dist

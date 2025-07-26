@@ -1,0 +1,41 @@
+{
+  "name": "@stak/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and business logic for Stak inbox service",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js && tsc --emitDeclarationOnly --outDir dist",
+    "dev": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.398.0",
+    "@aws-sdk/lib-dynamodb": "^3.398.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "esbuild": "^0.25.8",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "stak",
+    "inbox",
+    "messaging",
+    "dynamodb",
+    "utilities"
+  ],
+  "private": true
+}

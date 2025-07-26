@@ -11,7 +11,7 @@ Resources:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
   # This is a Lambda function config associated with the source code: get-all-items.js
-  getAllItemsFunction:
+  getAllMessagesFn:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: esbuild
@@ -22,11 +22,16 @@ Resources:
         - .js=.mjs
         Target: "es2020"
         Sourcemap: true
+        MainFields: "package.json"
         EntryPoints:
-        - app.ts
+        - get-messages.ts
+        External:
+        - "@stak/shared"
+        - "@aws-sdk/client-dynamodb"
+        - "@aws-sdk/lib-dynamodb"
     Properties:
       CodeUri: src/handlers/
-      Handler: app.handler
+      Handler: get-messages.handler
       Runtime: nodejs22.x
       Architectures:
       - x86_64
@@ -46,7 +51,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /
+            Path: /user/messages
             Method: GET
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -54,8 +59,25 @@ Resources:
   # This is a Lambda function config associated with the source code: get-by-id.js
   getByIdFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+        - .js=.mjs
+        Target: "es2020"
+        Sourcemap: true
+        MainFields: "package.json"
+        EntryPoints:
+        - get-message-by-id.ts
+        External:
+        - "@stak/shared"
+        - "@aws-sdk/client-dynamodb"
+        - "@aws-sdk/lib-dynamodb"
     Properties:
-      Handler: src/handlers/get-by-id.getByIdHandler
+      CodeUri: src/handlers/
+      Handler: get-message-by-id.handler
       Runtime: nodejs22.x
       Architectures:
       - x86_64
@@ -75,16 +97,33 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /{id}
+            Path: /user/messages/{id}
             Method: GET
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
   # This is a Lambda function config associated with the source code: put-item.js
-  putItemFunction:
+  adminPublishMessage:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        Target: "es2020"
+        OutExtension:
+        - .js=.mjs
+        Sourcemap: true
+        MainFields: "package.json"
+        EntryPoints:
+        - publish-message.ts
+        External:
+        - "@stak/shared"
+        - "@aws-sdk/client-dynamodb"
+        - "@aws-sdk/lib-dynamodb"
     Properties:
-      Handler: src/handlers/put-item.putItemHandler
+      CodeUri: src/handlers/
+      Handler: publish-message.handler
       Runtime: nodejs22.x
       Architectures:
       - x86_64
@@ -104,7 +143,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /
+            Path: /admin/messages
             Method: POST
   # Simple syntax to create a DynamoDB table with a single attribute primary key, more in
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlesssimpletable
