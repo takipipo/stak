@@ -10,7 +10,7 @@ export async function handler(
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: 'hi hello'
+      message: 'hi hello hot-reloaded!!!'
     })
   }
 }

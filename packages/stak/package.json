@@ -11,9 +11,10 @@
   },
   "scripts": {
     "dev": "sam local start-api --skip-pull-image",
-    "dev:info": "awslocal apigateway get-rest-apis | jq '.items[] | \"http://localhost:4566/_aws/execute-api/\\(.id)/Prod/user/message\"'",
-    "delete": "samlocal delete --region us-east-1 --stack-name local --no-prompts",
-    "sync": "samlocal deploy --region us-east-1 --stack-name local",
+    "localstack:deploy": "samlocal deploy --region us-east-1 --stack-name local",
+    "localstack:sync": "samlocal sync --region us-east-1 --stack-name local",
+    "localstack:info": "awslocal apigateway get-rest-apis | jq '.items[] | \"http://localhost:4566/_aws/execute-api/\\(.id)/Prod/user/messages\"'",
+    "localstack:delete": "samlocal delete --region us-east-1 --stack-name local --no-prompts",
     "build": "sam build && sam validate",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },

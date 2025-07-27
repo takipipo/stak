@@ -11,7 +11,6 @@ help: ## Show this help message
 check-deps: ## Check if all required dependencies are installed
 	@echo "Checking dependencies..."
 	@command -v docker >/dev/null 2>&1 || (echo "❌ Docker is not installed" && exit 1)
-	@command -v docker-compose >/dev/null 2>&1 || (echo "❌ Docker Compose is not installed" && exit 1)
 	@command -v pipx >/dev/null 2>&1 || (echo "❌ pipx is not installed. Install with: brew install pipx" && exit 1)
 	@command -v awslocal >/dev/null 2>&1 || (echo "❌ awslocal is not installed. Run: make install-deps" && exit 1)
 	@command -v samlocal >/dev/null 2>&1 || (echo "❌ samlocal is not installed. Run: make install-deps" && exit 1)
@@ -34,7 +33,7 @@ dev-setup: check-deps ## Set up development environment
 
 dev-start: ## Start LocalStack and related services
 	@echo "Starting LocalStack..."
-	cd infra/local && docker-compose up -d
+	npm run infra:local:up
 	@echo "Waiting for LocalStack to be ready..."
 	@until curl -s http://localhost:4566/health | grep -q "running"; do \
 		echo "Waiting for LocalStack..."; \
@@ -44,11 +43,11 @@ dev-start: ## Start LocalStack and related services
 
 dev-stop: ## Stop LocalStack and related services
 	@echo "Stopping LocalStack..."
-	cd infra/local && docker-compose down
+	npm run infra:local:down
 	@echo "✅ LocalStack stopped"
 
 dev-logs: ## Show LocalStack logs
-	cd infra/local && docker-compose logs -f
+	cd infra/local && docker compose logs -f
 
 dev: dev-setup dev-start ## Full development setup (install deps, start services)
 
@@ -71,7 +70,7 @@ test-shared: ## Run shared package tests
 
 # Cleanup
 clean: ## Clean up build artifacts and containers
-	cd infra/local && docker-compose down -v
+	cd infra/local && docker compose down -v
 	cd packages/stak && rm -rf .aws-sam
 	cd packages/shared && rm -rf dist
 	npm run clean -w packages/shared
