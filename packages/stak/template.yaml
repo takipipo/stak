@@ -47,6 +47,7 @@ Resources:
         Variables:
           # Make table name accessible as environment variable from function code during execution
           SAMPLE_TABLE: !Ref SampleTable
+          NODE_OPTIONS: --enable-source-maps
       Events:
         Api:
           Type: Api
@@ -93,6 +94,7 @@ Resources:
         Variables:
           # Make table name accessible as environment variable from function code during execution
           SAMPLE_TABLE: !Ref SampleTable
+          NODE_OPTIONS: --enable-source-maps
       Events:
         Api:
           Type: Api
@@ -139,6 +141,7 @@ Resources:
         Variables:
           # Make table name accessible as environment variable from function code during execution
           SAMPLE_TABLE: !Ref SampleTable
+          NODE_OPTIONS: --enable-source-maps
       Events:
         Api:
           Type: Api

@@ -28,3 +28,10 @@ warm_containers = "EAGER"
 
 [default.local_start_lambda.parameters]
 warm_containers = "EAGER"
+
+[default.local_invoke.parameters]
+docker_network = "stak-local"
+
+[local.sync.parameters]
+docker_network = "stak-local"
+base_dir = "."

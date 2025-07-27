@@ -219,15 +219,105 @@ Responses
 }
 ```
 
-## Technnology Stack
+## Technology Stack
 
-- monorepo
-- Lambda via SAM
-- TypeScript
-- Message Queue - SQS
-- Development Simulation
-    - using Serverless Offline
-    - LocalStack
+- Monorepo with npm workspaces
+- Lambda via SAM (Serverless Application Model)
+- TypeScript with esbuild
+- Development Simulation with LocalStack
 - Persistent: DynamoDB (Single Table Design)
 
 Please read [implementation](/implementation.md) for the details.
+
+## Local Development Setup
+
+### Prerequisites
+
+The following tools are required for local development:
+
+- **Docker & Docker Compose** - For running LocalStack
+- **pipx** - For installing Python CLI tools
+- **Node.js & npm** - For package management and builds
+- **awslocal** - AWS CLI for LocalStack (installed via pipx)
+- **samlocal** - SAM CLI for LocalStack (installed via pipx)
+
+### Quick Start
+
+1. **Check dependencies and install missing tools:**
+   ```bash
+   make check-deps          # Check if all tools are installed
+   make install-deps        # Install awslocal and samlocal via pipx
+   ```
+
+2. **Set up development environment:**
+   ```bash
+   make dev                 # Full setup: install deps + start services
+   ```
+
+   Or run steps individually:
+   ```bash
+   make dev-setup          # Install npm packages and build shared module
+   make dev-start          # Start LocalStack services
+   ```
+
+3. **Start development workflow:**
+   ```bash
+   make sam-sync           # Start sam sync for fast iteration
+   ```
+
+### Development Commands
+
+| Command | Description |
+|---------|-------------|
+| `make help` | Show all available commands |
+| `make check-deps` | Check if all required dependencies are installed |
+| `make install-deps` | Install awslocal and samlocal via pipx |
+| `make dev` | Full development setup (deps + services) |
+| `make dev-start` | Start LocalStack services |
+| `make dev-stop` | Stop LocalStack services |
+| `make dev-logs` | Show LocalStack logs |
+| `make sam-sync` | Start sam sync for fast development iteration |
+| `make sam-build` | Build SAM application |
+| `make sam-deploy-local` | Deploy to LocalStack |
+| `make test` | Run tests |
+| `make build` | Build all packages |
+| `make status` | Check status of local services |
+| `make clean` | Clean up build artifacts and containers |
+
+### Development Workflow
+
+1. Start LocalStack: `make dev-start`
+2. In another terminal, start sam sync: `make sam-sync`
+3. Make changes to your code
+4. SAM will automatically rebuild and redeploy changes
+5. Test your changes against LocalStack endpoints
+
+### Architecture
+
+The project uses a monorepo structure:
+
+```
+stak/
+├── packages/
+│   ├── stak/                # Lambda entry point and AWS infrastructure
+│   │   ├── src/handlers/    # TypeScript Lambda handlers
+│   │   ├── template.yaml    # SAM template
+│   │   └── package.json     # Lambda service dependencies
+│   └── shared/              # TypeScript ESM module for shared code
+│       ├── src/             # Shared utilities and business logic
+│       └── package.json     # Shared module dependencies
+├── infra/local/             # LocalStack configuration
+├── Makefile                 # Development automation
+└── README.md
+```
+
+### LocalStack Services
+
+The local environment runs:
+- DynamoDB (port 4566)
+- API Gateway (port 4566)
+- CloudFormation (port 4566)
+- IAM (port 4566)
+- Lambda (port 4566)
+
+All services are accessible via http://localhost:4566

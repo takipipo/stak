@@ -22,6 +22,9 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+    "infra:local:up": "docker-compose -f ./infra/local/docker-compose.yaml up -d",
+    "infra:local:down": "docker-compose -f ./infra/local/docker-compose.yaml down",
+    "infra:local:restart": "docker-compose -f ./infra/local/docker-compose.yaml restart",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
