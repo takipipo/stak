@@ -1,8 +1,6 @@
-// Create clients and set shared const values outside of the handler.
-
-// Create a DocumentClient that represents the query to add an item
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBDocumentClient, PutCommand, type PutCommandInput } from '@aws-sdk/lib-dynamodb'
+
 const client = new DynamoDBClient({})
 const ddbDocClient = DynamoDBDocumentClient.from(client)
 
@@ -31,7 +29,7 @@ export const handler = async (event) => {
 
     // Creates a new item, or replaces an old item with a new item
     // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
-    const params = {
+    const params: PutCommandInput = {
       TableName: tableName,
       Item: { id: id, name: name }
     }
