@@ -135,3 +135,44 @@ Messages support multi-tenant architecture with:
   - `npm run localstack:deploy -w packages/stak`
   - `npm run localstack:sync -w packages/stak`
   - `npm run localstack:info -w packages/stak` - Get API endpoints
+
+## Handler Development Pattern
+
+### HttpHandlerBuilder Utility
+The codebase includes a custom `HttpHandlerBuilder` utility (`packages/stak/src/utils/http.lambda.ts`) that simplifies Lambda handler creation with a fluent API pattern:
+
+```typescript
+import { HttpHandlerBuilder } from '../utils/http.lambda'
+
+export const handler = new HttpHandlerBuilder()
+  .useMethod('POST')                    // Validate HTTP method
+  .useJsonBody((body) => {             // Parse and validate JSON body
+    const { id, name } = body
+    if (!id) throw new Error('body.id is required.')
+    return { id, name }
+  })
+  .useSuccessStatusCode(201)           // Set success status code
+  .run(async (input, event, context) => {
+    // Handler logic with validated input
+    return { result: 'success' }
+  })
+  .build()                             // Returns APIGatewayProxyHandler
+```
+
+### Handler Builder Features
+- **Method Validation**: `.useMethod('GET'|'POST'|'PUT'|'DELETE'|'PATCH')`
+- **JSON Body Parsing**: `.useJsonBody(validator)` with custom validation
+- **Success Status Codes**: `.useSuccessStatusCode(200|201)`
+- **Automatic Error Handling**: Catches exceptions and returns 500 with error details
+- **Consistent Response Format**: All responses follow `{ success: boolean, data/reason }` pattern
+- **Type Safety**: Progressive type building with each validation step
+
+### Handler Response Format
+All handlers return consistent JSON responses:
+```typescript
+// Success response
+{ "success": true, "data": <handler_result> }
+
+// Error response  
+{ "success": false, "reason": "<error_message>" }
+```

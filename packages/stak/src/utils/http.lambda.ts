@@ -1,5 +1,4 @@
 import type { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
-import { requiredHttpMethod, requiredJsonBody } from '../validation/http.validation'
 
 export interface HttpSuccessResult<T> {
   success: true
@@ -38,6 +37,29 @@ export const _helpers = {
       success: false,
       reason: (e && e.message) || `${e}`
     }
+  },
+  requiredHttpMethod(event: APIGatewayEvent, ...requiredMethod: AllowedMethod[]): AllowedMethod {
+    const i = event.httpMethod as AllowedMethod
+    if (requiredMethod.indexOf(i) >= 0) {
+      return i
+    }
+    throw new Error(`Invalid httpMethod. Expected one of ${requiredMethod.join(', ')}. Got ${i}.`)
+  },
+  requiredJsonBody<J>(event: APIGatewayEvent, marshaller?: (o: any) => J): J {
+    if (!event.body) {
+      throw new Error(`Invalid body. Expected JSON input. Got empty`)
+    }
+    try {
+      const rawJson = JSON.parse(event.body)
+      if (marshaller) {
+        return marshaller(rawJson)
+      }
+      return rawJson
+    } catch (e) {
+      throw new Error(
+        `Invalid body. Expected valid JSON input. But marshalling failed.: ${(e as Error).message}`
+      )
+    }
   }
 }
 
@@ -55,9 +77,9 @@ export class HttpHandlerBuilder<R = {}> {
 
   public useMethod(m: AllowedMethod): HttpHandlerBuilder<R & Record<'method', AllowedMethod>> {
     this.validations.push((r, e) => {
-      const method = requiredHttpMethod(e, m)
+      const method = _helpers.requiredHttpMethod(e, m)
       // augment it!
-      r['method'] = method
+      ;(r as any)['method'] = method
     })
     return this as HttpHandlerBuilder<any>
   }
@@ -66,9 +88,9 @@ export class HttpHandlerBuilder<R = {}> {
     marshaller: (content: any) => T
   ): HttpHandlerBuilder<R & Record<'body', T>> {
     this.validations.push((r, e) => {
-      const body = requiredJsonBody(e, marshaller)
+      const body = _helpers.requiredJsonBody(e, marshaller)
       // augment it!
-      r['body'] = body
+      ;(r as any)['body'] = body
     })
     return this as HttpHandlerBuilder<any>
   }
@@ -100,7 +122,7 @@ export class HttpHandlerBuilder<R = {}> {
       } catch (e) {
         return {
           statusCode: 500,
-          body: JSON.stringify(_helpers.wrapToErrorResult(e))
+          body: JSON.stringify(_helpers.wrapToErrorResult(e as Error))
         }
       }
     }

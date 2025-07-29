@@ -1,5 +1,5 @@
 import { createPartitionKey } from '@stak/shared'
-import { HttpHandlerBuilder } from './utils'
+import { HttpHandlerBuilder } from '../utils/http.lambda'
 
 export const handler = new HttpHandlerBuilder()
   .useMethod('GET')
