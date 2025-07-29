@@ -7,11 +7,26 @@ Transform:
 # Resources declares the AWS resources that you want to include in the stack
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 Resources:
+  MessagePublisherQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: stak-message-publisher-q
+      VisibilityTimeout: 300
+      MessageRetentionPeriod: 1209600  # 14 days
+      DelaySeconds: 0
+      ReceiveMessageWaitTimeSeconds: 20  # Long polling
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt MessagePublisherQueueDLQ.Arn
+        maxReceiveCount: 3
+  MessagePublisherQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: stak-message-publisher-dlq
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
   # This is a Lambda function config associated with the source code: get-all-items.js
-  getAllMessagesFn:
+  GetAllMessagesFn:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: esbuild
@@ -42,11 +57,14 @@ Resources:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
       - DynamoDBCrudPolicy:
           TableName: !Ref SampleTable
+      - SQSSendMessagePolicy:
+          QueueName: !GetAtt MessagePublisherQ.QueueName
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
           SAMPLE_TABLE: !Ref SampleTable
           NODE_OPTIONS: --enable-source-maps
+          SQS_MESSAGE_PUBLISHER_Q_URL: !Ref MessagePublisherQ
       Events:
         Api:
           Type: Api
@@ -57,7 +75,7 @@ Resources:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
   # This is a Lambda function config associated with the source code: get-by-id.js
-  getByIdFunction:
+  GetMessageByIdFn:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: esbuild
@@ -103,7 +121,7 @@ Resources:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
   # This is a Lambda function config associated with the source code: put-item.js
-  adminPublishMessage:
+  AdminPublishMessageFn:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: esbuild
@@ -116,20 +134,19 @@ Resources:
         Sourcemap: true
         MainFields: "package.json"
         EntryPoints:
-        - publish-message.ts
+        - admin-publish-message.ts
         External:
         - "@aws-sdk/client-dynamodb"
         - "@aws-sdk/lib-dynamodb"
     Properties:
       CodeUri: src/handlers/
-      Handler: publish-message.handler
+      Handler: admin-publish-message.handler
       Runtime: nodejs22.x
       Architectures:
       - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: A simple example includes a HTTP post method to add one item to
-        a DynamoDB table.
+      Description: Post a message. Create a message onto DynamoDB (Generated Id) and send a message publisher to the Queue. In case it is public message.
       Policies:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
       - DynamoDBCrudPolicy:

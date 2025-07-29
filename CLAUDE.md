@@ -8,16 +8,30 @@ Stak is an open-source inbox service application designed to handle mobile app m
 
 ## Development Commands
 
+### Quick Setup
+- `make dev` - Full development setup (install deps + start LocalStack)
+- `make check-deps` - Verify all required tools are installed
+- `make install-deps` - Install awslocal and samlocal via pipx
+
+### Local Development & Testing
+- `make dev-start` - Start LocalStack services
+- `make sam-sync` - Start sam sync for fast development iteration (recommended)
+- `make sam-build` - Build SAM application
+- `make sam-deploy-local` - Deploy to LocalStack
+- `make test` - Run Jest unit tests for Lambda service
+- `npm run build -w packages/shared` - Build shared module
+- `npm run type-check -w packages/shared` - Type check shared module
+
 ### Package Management
 - `npm install` - Install dependencies for all packages
 - `npm install -w packages/stak` - Install dependencies for the Lambda service
 - `npm install -w packages/shared` - Install dependencies for shared utilities
 
-### Local Development & Testing
-- `npm run dev -w packages/stak` - Start SAM local API server
-- `npm run build -w packages/stak` - Build Lambda functions with SAM
-- `npm test -w packages/stak` - Run Jest unit tests
-- Use LocalStack for local AWS service simulation (as mentioned in README)
+### LocalStack Development
+- `make dev-stop` - Stop LocalStack services
+- `make dev-logs` - Show LocalStack logs
+- `make status` - Check status of local services
+- `make clean` - Clean up build artifacts and containers
 
 ### AWS Deployment
 - `cd packages/stak && sam deploy` - Deploy Lambda functions to AWS
