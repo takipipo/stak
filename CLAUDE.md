@@ -103,3 +103,35 @@ Messages support multi-tenant architecture with:
 - Single-table design optimized for query patterns
 - Partition keys designed to distribute load across user bases
 - Message IDs are shared across recipients for storage efficiency
+
+## Development Prerequisites
+
+### Required Tools
+- **Docker & Docker Compose** - For running LocalStack
+- **pipx** - For installing Python CLI tools (`brew install pipx`)
+- **Node.js & npm** - For package management and builds
+- **awslocal** - AWS CLI for LocalStack (installed via `make install-deps`)
+- **samlocal** - SAM CLI for LocalStack (installed via `make install-deps`)
+
+### Development Workflow
+1. Start LocalStack: `make dev-start`
+2. In another terminal, start sam sync: `make sam-sync` 
+3. Make changes to your code
+4. SAM will automatically rebuild and redeploy changes
+5. Test your changes against LocalStack endpoints (http://localhost:4566)
+
+## Build System Details
+
+### Shared Module Build
+- Uses **esbuild** for TypeScript compilation to ES modules
+- Build command: `npm run build -w packages/shared`
+- Watch mode: `npm run dev -w packages/shared`
+- Type checking: `npm run type-check -w packages/shared`
+
+### Lambda Service Build  
+- Uses **SAM** with esbuild for Lambda bundling
+- Test command: `npm test -w packages/stak` (uses Jest with ES modules support)
+- LocalStack commands in package.json:
+  - `npm run localstack:deploy -w packages/stak`
+  - `npm run localstack:sync -w packages/stak`
+  - `npm run localstack:info -w packages/stak` - Get API endpoints
