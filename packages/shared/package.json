@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.398.0",
-    "@aws-sdk/lib-dynamodb": "^3.398.0"
+    "@aws-sdk/lib-dynamodb": "^3.398.0",
+    "dynamodb-onetable": "^2.7.7"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

@@ -1,5 +1,4 @@
 import * as esbuild from 'esbuild'
-import { execSync } from 'child_process'
 
 // Build the JavaScript bundle
 esbuild.buildSync({
@@ -12,6 +11,3 @@ esbuild.buildSync({
   external: ['@aws-sdk/lib-dynamodb', '@aws-sdk/client-dynamodb'],
   outfile: 'dist/index.js'
 })
-
-// Generate TypeScript declaration files
-execSync('tsc --emitDeclarationOnly --outDir dist')

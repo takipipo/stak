@@ -1,13 +1,13 @@
 {
-  "name": "delete-test-01",
-  "description": "delete-test-01-description",
+  "name": "stak-sv",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.398.0",
     "@aws-sdk/lib-dynamodb": "^3.398.0",
-    "@stak/shared": "*"
+    "@stak/shared": "*",
+    "dynamodb-onetable": "^2.7.7"
   },
   "scripts": {
     "dev": "sam local start-api --skip-pull-image",
