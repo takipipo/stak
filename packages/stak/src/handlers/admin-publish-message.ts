@@ -19,6 +19,7 @@ export const handler = new HttpHandlerBuilder()
     }
     return { content, author, to, tenantKey }
   })
+  .usePath('tenantKey')
   .useSuccessStatusCode(200)
   .run(async (i) => {
     // Creates a new item, or replaces an old item with a new item

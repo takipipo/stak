@@ -95,6 +95,14 @@ export class HttpHandlerBuilder<R = {}> {
     return this as HttpHandlerBuilder<any>
   }
 
+  public usePath<K extends string>(
+    key: K,
+    regex?: RegExp
+  ): HttpHandlerBuilder<R & Record<K, string>> {
+    // TODO: Add Path Validation
+    return this as HttpHandlerBuilder<any>
+  }
+
   public run(h: BuilderRunHandler<R, any>): HttpHandlerBuilder<R> {
     this.h = h
     return this
