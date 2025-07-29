@@ -11,8 +11,8 @@
   },
   "scripts": {
     "dev": "sam local start-api --skip-pull-image",
-    "localstack:deploy": "samlocal deploy --region us-east-1 --stack-name local",
-    "localstack:sync": "samlocal sync --region us-east-1 --stack-name local",
+    "localstack:deploy": "npm run build && samlocal deploy --region us-east-1 --stack-name local",
+    "localstack:sync": "npm run build && samlocal sync --region us-east-1 --stack-name local",
     "localstack:info": "awslocal apigateway get-rest-apis | jq '.items[] | \"http://localhost:4566/_aws/execute-api/\\(.id)/Prod/user/messages\"'",
     "localstack:delete": "samlocal delete --region us-east-1 --stack-name local --no-prompts",
     "build": "sam build && sam validate",

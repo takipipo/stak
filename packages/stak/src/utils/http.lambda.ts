@@ -99,6 +99,13 @@ export class HttpHandlerBuilder<R = {}> {
     key: K,
     regex?: RegExp
   ): HttpHandlerBuilder<R & Record<K, string>> {
+    this.validations.push((r, e) => {
+      const pathVal = (e.pathParameters || {})[key as string]
+      if (!pathVal) {
+        throw new Error(`Path: ${key} is missing.`)
+      }
+      ;(r as any)[key] = pathVal
+    })
     // TODO: Add Path Validation
     return this as HttpHandlerBuilder<any>
   }

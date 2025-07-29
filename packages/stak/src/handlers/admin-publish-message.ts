@@ -14,18 +14,15 @@ export const handler = new HttpHandlerBuilder()
     if (!to || typeof to !== 'string') {
       throw new Error(`body.to is required.`)
     }
-    if (!tenantKey || typeof tenantKey !== 'string') {
-      throw new Error(`body.tenantKey is required.`)
-    }
     return { content, author, to, tenantKey }
   })
   .usePath('tenantKey')
   .useSuccessStatusCode(200)
   .run(async (i) => {
     // Creates a new item, or replaces an old item with a new item
-    const m = await UserMessageModel.create({
+    const m = await UserMessageModel.upsert({
       body: i.body.content,
-      tenantKey: i.body.tenantKey,
+      tenantKey: i.tenantKey,
       inboxKey: 'DEFAULT',
       messageId: 'ABC', // TODO: Generate Message ID
       userId: i.body.to
