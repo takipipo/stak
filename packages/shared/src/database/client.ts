@@ -21,4 +21,3 @@ export function createDocumentClient(): DynamoDBDocumentClient {
   }
   return docClient
 }
-

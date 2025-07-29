@@ -62,7 +62,7 @@ Resources:
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          DDB_TABLE_NAME: !Ref SampleTable
           NODE_OPTIONS: --enable-source-maps
           SQS_MESSAGE_PUBLISHER_Q_URL: !Ref MessagePublisherQ
       Events:
@@ -109,7 +109,7 @@ Resources:
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          DDB_TABLE_NAME: !Ref SampleTable
           NODE_OPTIONS: --enable-source-maps
       Events:
         Api:
@@ -154,7 +154,7 @@ Resources:
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          DDB_TABLE_NAME: !Ref SampleTable
           NODE_OPTIONS: --enable-source-maps
       Events:
         Api:
