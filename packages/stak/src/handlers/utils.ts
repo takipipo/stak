@@ -1,0 +1,108 @@
+import type { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
+import { requiredHttpMethod, requiredJsonBody } from '../validation/http.validation'
+
+export interface HttpSuccessResult<T> {
+  success: true
+  data: T
+}
+
+export interface HttpFailureResult {
+  success: false
+  reason: string
+}
+
+export type HttpResult<T> = HttpSuccessResult<T> | HttpFailureResult
+
+type HttpSuccessStatusCode = 200 | 201
+
+interface BuilderRunHandler<I, T> {
+  (input: I, event: APIGatewayEvent, context: Context): Promise<T>
+}
+
+type AllowedMethod = 'POST' | 'GET' | 'PUT' | 'DELETE' | 'PATCH'
+
+type LambdaAPIGatewayEventHandler = (
+  event: APIGatewayEvent,
+  context: Context
+) => Promise<APIGatewayProxyResult>
+
+export const _helpers = {
+  wrapToSuccess<T>(d: T): HttpSuccessResult<T> {
+    return {
+      success: true,
+      data: d
+    }
+  },
+  wrapToErrorResult(e: Error): HttpFailureResult {
+    return {
+      success: false,
+      reason: (e && e.message) || `${e}`
+    }
+  }
+}
+
+export class HttpHandlerBuilder<R = {}> {
+  private h: BuilderRunHandler<R, any> = () => {
+    throw new Error(`Implementation is required. Have you called '.run(handler)'?`)
+  }
+
+  public constructor(
+    public successStatusCode: HttpSuccessStatusCode = 200,
+    public validations: ((i: R, e: APIGatewayEvent, context: Context) => void)[] = []
+  ) {
+    //
+  }
+
+  public useMethod(m: AllowedMethod): HttpHandlerBuilder<R & Record<'method', AllowedMethod>> {
+    this.validations.push((r, e) => {
+      const method = requiredHttpMethod(e, m)
+      // augment it!
+      r['method'] = method
+    })
+    return this as HttpHandlerBuilder<any>
+  }
+
+  public useJsonBody<T>(
+    marshaller: (content: any) => T
+  ): HttpHandlerBuilder<R & Record<'body', T>> {
+    this.validations.push((r, e) => {
+      const body = requiredJsonBody(e, marshaller)
+      // augment it!
+      r['body'] = body
+    })
+    return this as HttpHandlerBuilder<any>
+  }
+
+  public run(h: BuilderRunHandler<R, any>): HttpHandlerBuilder<R> {
+    this.h = h
+    return this
+  }
+
+  public useSuccessStatusCode(code: HttpSuccessStatusCode = 200): HttpHandlerBuilder<R> {
+    this.successStatusCode = code
+    return this
+  }
+
+  public build(): LambdaAPIGatewayEventHandler {
+    return async (e: APIGatewayEvent, c: Context): Promise<APIGatewayProxyResult> => {
+      try {
+        // context augmentation buffer (to be reduced)
+        let r = {} as any
+        for (const v of this.validations) {
+          v(r, e, c)
+        }
+        const result = await this.h(r, e, c)
+        const resp = {
+          statusCode: this.successStatusCode,
+          body: JSON.stringify(_helpers.wrapToSuccess(result))
+        }
+        return resp
+      } catch (e) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify(_helpers.wrapToErrorResult(e))
+        }
+      }
+    }
+  }
+}

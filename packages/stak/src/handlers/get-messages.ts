@@ -1,20 +1,13 @@
-import { Context, APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { createPartitionKey } from '@stak/shared'
+import { HttpHandlerBuilder } from './utils'
 
-export async function handler(
-  _event: APIGatewayEvent,
-  _context: Context
-): Promise<APIGatewayProxyResult> {
-  //
-  console.info('handler invoked!')
-
-  const partiionKey = createPartitionKey('TEST', 'UID123')
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
+export const handler = new HttpHandlerBuilder()
+  .useMethod('GET')
+  .run(async () => {
+    const partiionKey = createPartitionKey('TEST', 'UID123')
+    return {
       message: `hi hello hot-reloaded!!!`,
       key: partiionKey
-    })
-  }
-}
+    }
+  })
+  .build()
