@@ -1,35 +1,35 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, PutCommand, type PutCommandInput } from '@aws-sdk/lib-dynamodb'
-
+import { UserMessageModel } from '@stak/shared'
 import { HttpHandlerBuilder } from '../utils/http.lambda'
-
-const client = new DynamoDBClient({})
-const ddbDocClient = DynamoDBDocumentClient.from(client)
-
-// Get the DynamoDB table name from environment variables
-const tableName = process.env.SAMPLE_TABLE
 
 export const handler = new HttpHandlerBuilder()
   .useMethod('POST')
   .useJsonBody((b) => {
-    const { id, name } = b
-    if (!id) {
-      throw new Error('body.id is required.')
+    const { content, author, to, tenantKey } = b
+    if (!content || typeof content !== 'string') {
+      throw new Error(`body.content is required.`)
     }
-    return { id, name }
+    if (!author || typeof author !== 'string') {
+      throw new Error(`body.author is required.`)
+    }
+    if (!to || typeof to !== 'string') {
+      throw new Error(`body.to is required.`)
+    }
+    if (!tenantKey || typeof tenantKey !== 'string') {
+      throw new Error(`body.tenantKey is required.`)
+    }
+    return { content, author, to, tenantKey }
   })
   .useSuccessStatusCode(200)
   .run(async (i) => {
     // Creates a new item, or replaces an old item with a new item
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
-    const params: PutCommandInput = {
-      TableName: tableName,
-      Item: i.body
-    }
+    const m = await UserMessageModel.create({
+      body: i.body.content,
+      tenantKey: i.body.tenantKey,
+      inboxKey: 'DEFAULT',
+      messageId: 'ABC', // TODO: Generate Message ID
+      userId: i.body.to
+    })
 
-    const data = await ddbDocClient.send(new PutCommand(params))
-    console.log('Success - item added or updated', data)
-
-    return params
+    return m
   })
   .build()

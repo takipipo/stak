@@ -8,6 +8,6 @@ esbuild.buildSync({
   target: 'node22',
   format: 'esm',
   logLevel: 'info',
-  external: ['@aws-sdk/lib-dynamodb', '@aws-sdk/client-dynamodb'],
+  external: ['@aws-sdk/lib-dynamodb', '@aws-sdk/client-dynamodb', '@aws-sdk/util-dynamodb'],
   outfile: 'dist/index.js'
 })

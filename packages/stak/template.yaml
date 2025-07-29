@@ -43,6 +43,7 @@ Resources:
         External:
         - "@aws-sdk/client-dynamodb"
         - "@aws-sdk/lib-dynamodb"
+        - "@aws-sdk/util-dynamodb"
     Properties:
       CodeUri: src/handlers/
       Handler: get-messages.handler
@@ -54,15 +55,15 @@ Resources:
       Description: A simple example includes a HTTP get method to get all items from
         a DynamoDB table.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        # Give Create/Read/Update/Delete Permissions to the TheTable
       - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
+          TableName: !Ref TheTable
       - SQSSendMessagePolicy:
           QueueName: !GetAtt MessagePublisherQ.QueueName
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          DDB_TABLE_NAME: !Ref SampleTable
+          DDB_TABLE_NAME: !Ref TheTable
           NODE_OPTIONS: --enable-source-maps
           SQS_MESSAGE_PUBLISHER_Q_URL: !Ref MessagePublisherQ
       Events:
@@ -92,6 +93,7 @@ Resources:
         External:
         - "@aws-sdk/client-dynamodb"
         - "@aws-sdk/lib-dynamodb"
+        - "@aws-sdk/util-dynamodb"
     Properties:
       CodeUri: src/handlers/
       Handler: get-message-by-id.handler
@@ -103,13 +105,13 @@ Resources:
       Description: A simple example includes a HTTP get method to get one item by
         id from a DynamoDB table.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        # Give Create/Read/Update/Delete Permissions to the TheTable
       - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
+          TableName: !Ref TheTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          DDB_TABLE_NAME: !Ref SampleTable
+          DDB_TABLE_NAME: !Ref TheTable
           NODE_OPTIONS: --enable-source-maps
       Events:
         Api:
@@ -138,6 +140,7 @@ Resources:
         External:
         - "@aws-sdk/client-dynamodb"
         - "@aws-sdk/lib-dynamodb"
+        - "@aws-sdk/util-dynamodb"
     Properties:
       CodeUri: src/handlers/
       Handler: admin-publish-message.handler
@@ -148,13 +151,13 @@ Resources:
       Timeout: 100
       Description: Post a message. Create a message onto DynamoDB (Generated Id) and send a message publisher to the Queue. In case it is public message.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        # Give Create/Read/Update/Delete Permissions to the TheTable
       - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
+          TableName: !Ref TheTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          DDB_TABLE_NAME: !Ref SampleTable
+          DDB_TABLE_NAME: !Ref TheTable
           NODE_OPTIONS: --enable-source-maps
       Events:
         Api:
@@ -166,12 +169,21 @@ Resources:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlesssimpletable
 
   # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
-  SampleTable:
-    Type: AWS::Serverless::SimpleTable
+  TheTable:
+    Type: AWS::DynamoDB::Table
     Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
+      TableName: the-table
+      BillingMode: PROVISIONED
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2

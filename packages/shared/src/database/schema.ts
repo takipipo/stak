@@ -10,15 +10,20 @@ const TheSchema = {
   },
   models: {
     UserMessage: {
-      pk: { type: String, value: 't#${tenantKey}U#${userId}#${inboxKey}' },
-      sk: { type: String, value: 'm#${messageId}' },
-      tenantKey: { type: String },
-      userId: { type: String },
-      messageId: { type: String },
-      inboxKey: { type: String },
+      pk: { type: String, value: 't:${tenantKey}:U${userId}:I${inboxKey}' },
+      sk: { type: String, value: 'm:${messageId}' },
+      kind: { type: String, enum: ['UM'], default: 'UM', required: true },
+      tenantKey: { type: String, required: true },
+      userId: { type: String, required: true },
+      messageId: { type: String, required: true },
+      inboxKey: { type: String, default: 'DEFAULT', required: true },
       body: { type: String }
     }
-  } as const
+  } as const,
+  params: {
+    isoDates: true,
+    timestamps: true
+  }
 }
 
 // Entity Type
@@ -31,7 +36,7 @@ if (!DDB_TABLE_NAME) {
   throw new Error(`Invalid state cannot initialize system without process.env.DDB_TABLE_NAME`)
 }
 
-const table = new Table({
+export const table = new Table({
   client: createDynamoClient(),
   name: DDB_TABLE_NAME,
   schema: TheSchema
