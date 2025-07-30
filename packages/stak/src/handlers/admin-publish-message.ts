@@ -1,4 +1,4 @@
-import { UserMessageModel } from '@stak/shared'
+import { AutoId, UserMessageModel } from '@stak/shared'
 import { HttpHandlerBuilder } from '../utils/http.lambda'
 
 export const handler = new HttpHandlerBuilder()
@@ -24,7 +24,7 @@ export const handler = new HttpHandlerBuilder()
       body: i.body.content,
       tenantKey: i.tenantKey,
       inboxKey: 'DEFAULT',
-      messageId: 'ABC', // TODO: Generate Message ID
+      messageId: AutoId.messageId.produce(),
       userId: i.body.to
     })
 

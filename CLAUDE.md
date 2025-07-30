@@ -176,3 +176,68 @@ All handlers return consistent JSON responses:
 // Error response  
 { "success": false, "reason": "<error_message>" }
 ```
+
+## Error Handling System
+
+### Comprehensive Error Classes
+The shared package includes a robust error handling system with predefined error classes:
+
+```typescript
+import { 
+  ValidationError, 
+  TenantNotFoundError, 
+  MessageExpiredError,
+  toErrorResponse 
+} from '@stak/shared'
+
+// Usage examples
+throw ValidationError.required('tenantKey')
+throw new TenantNotFoundError('invalid-tenant')
+throw new MessageExpiredError('msg-123', Date.now())
+```
+
+### Error Hierarchy
+- **StakError** - Base class for all application errors
+  - **ClientError** - 4xx errors (user/client issues)
+    - ValidationError, NotFoundError, UnauthorizedError, etc.
+  - **ServerError** - 5xx errors (internal/system issues) 
+    - DatabaseError, ExternalServiceError, TimeoutError, etc.
+
+### Domain-Specific Errors
+- **Tenant Errors**: TenantNotFoundError, TenantDisabledError, TenantQuotaExceededError
+- **Message Errors**: MessageNotFoundError, MessageExpiredError, MessageAlreadyReadError, InvalidMessageFormatError
+- **User Errors**: UserNotFoundError, InvalidUserIdError
+- **Inbox Errors**: InboxNotFoundError, InboxConfigurationError
+- **Audience Errors**: InvalidAudienceError, EmptyAudienceError, AudienceTooLargeError
+
+### Error Utilities
+```typescript
+import { toErrorResponse, isStakError, withErrorHandling } from '@stak/shared'
+
+// Convert any error to API response format
+const response = toErrorResponse(error)
+
+// Check if error is a StakError
+if (isStakError(error)) {
+  console.log(`Error code: ${error.code}`)
+}
+
+// Wrap functions with error handling
+const safeFunction = withErrorHandling(riskyFunction)
+```
+
+### Error Response Format
+All StakError instances provide consistent JSON structure:
+```typescript
+{
+  "success": false,
+  "error": {
+    "name": "TenantNotFoundError",
+    "code": "TENANT_NOT_FOUND", 
+    "message": "Tenant 'invalid-key' not found",
+    "statusCode": 404,
+    "timestamp": 1234567890,
+    "details": { "tenantKey": "invalid-key" }
+  }
+}
+```

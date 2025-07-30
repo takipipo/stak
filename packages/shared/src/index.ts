@@ -16,3 +16,5 @@ export * from './services/index.js'
 // Error classes
 export * from './errors/index.js'
 
+// Export autoIds
+export * from './id/index.js'
