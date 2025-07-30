@@ -70,4 +70,3 @@ export class MethodNotAllowedError extends ClientError {
     )
   }
 }
-

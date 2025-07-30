@@ -1,3 +1,4 @@
+import { MethodNotAllowedError } from '@stak/shared'
 import type { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 
 export interface HttpSuccessResult<T> {
@@ -43,7 +44,7 @@ export const _helpers = {
     if (requiredMethod.indexOf(i) >= 0) {
       return i
     }
-    throw new Error(`Invalid httpMethod. Expected one of ${requiredMethod.join(', ')}. Got ${i}.`)
+    throw new MethodNotAllowedError(i, requiredMethod)
   },
   requiredJsonBody<J>(event: APIGatewayEvent, marshaller?: (o: any) => J): J {
     if (!event.body) {

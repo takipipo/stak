@@ -102,15 +102,16 @@ export function withErrorHandling<T extends any[], R>(
 
       // Convert unknown errors to generic server errors
       const { ServerError } = await import('./base.js')
-      
+
       class InternalError extends ServerError {
         constructor(originalError: unknown) {
           super(getErrorMessage(originalError), 'INTERNAL_ERROR', 500, {
-            originalError: originalError instanceof Error ? originalError.name : typeof originalError
+            originalError:
+              originalError instanceof Error ? originalError.name : typeof originalError
           })
         }
       }
-      
+
       throw new InternalError(error)
     }
   }
@@ -152,7 +153,7 @@ export class ErrorAggregator {
   throwIfErrors(): void {
     if (this.hasErrors()) {
       const { ServerError } = require('./base.js')
-      
+
       class MultipleErrors extends ServerError {
         constructor(errors: StakError[]) {
           super(`Multiple errors occurred (${errors.length} errors)`, 'MULTIPLE_ERRORS', 500, {
@@ -161,9 +162,8 @@ export class ErrorAggregator {
           })
         }
       }
-      
+
       throw new MultipleErrors(this.errors)
     }
   }
 }
-

@@ -82,4 +82,3 @@ export abstract class ServerError extends StakError {
     super(message, code, statusCode, details)
   }
 }
-

@@ -4,26 +4,14 @@ import { ClientError, ServerError } from './base.js'
  * Authentication and authorization errors
  */
 export class UnauthorizedError extends ClientError {
-  constructor(message: string = 'Unauthorized access', details?: Record<string, any>) {
+  constructor(message: 'invalid-token' | 'expired-token', details?: Record<string, any>) {
     super(message, 'UNAUTHORIZED', 401, details)
   }
 }
 
 export class ForbiddenError extends ClientError {
-  constructor(message: string = 'Access forbidden', details?: Record<string, any>) {
+  constructor(message: 'access-forbidden', details?: Record<string, any>) {
     super(message, 'FORBIDDEN', 403, details)
-  }
-}
-
-export class InvalidTokenError extends UnauthorizedError {
-  constructor(tokenType: string = 'token') {
-    super(`Invalid ${tokenType}`, { tokenType })
-  }
-}
-
-export class ExpiredTokenError extends UnauthorizedError {
-  constructor(tokenType: string = 'token') {
-    super(`${tokenType} has expired`, { tokenType })
   }
 }
 
@@ -107,4 +95,3 @@ export class TimeoutError extends ServerError {
     })
   }
 }
-
