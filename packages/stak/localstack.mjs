@@ -124,11 +124,8 @@ async function syncStack() {
 
 async function getApiInfo() {
   log('ℹ️  Getting API Gateway information...', colors.blue)
-  const result = execCommand(
-    `awslocal apigateway get-rest-apis`,
-    { silent: true }
-  )
-  
+  const result = execCommand(`awslocal apigateway get-rest-apis`, { silent: true })
+
   if (result.success) {
     try {
       const apis = JSON.parse(result.output)
@@ -137,13 +134,22 @@ async function getApiInfo() {
           log(`📍 API Gateway ID: ${api.id}`, colors.green)
           log(`🔗 Base URL: http://localhost:4566/_aws/execute-api/${api.id}/Prod`, colors.cyan)
           log(`📋 Sample endpoints:`, colors.blue)
-          log(`   GET  http://localhost:4566/_aws/execute-api/${api.id}/Prod/user/messages`, colors.reset)
-          log(`   POST http://localhost:4566/_aws/execute-api/${api.id}/Prod/admin/v1/{tenantKey}/{inboxKey}/messages/post`, colors.reset)
-          
+          log(
+            `   GET  http://localhost:4566/_aws/execute-api/${api.id}/Prod/user/messages`,
+            colors.reset
+          )
+          log(
+            `   POST http://localhost:4566/_aws/execute-api/${api.id}/Prod/admin/v1/{tenantKey}/{inboxKey}/messages/post`,
+            colors.reset
+          )
+
           // Set environment variable for easy testing
           log(`\n🧪 Test environment variable:`, colors.yellow)
           log(`export API_GATEWAY_ID=${api.id}`, colors.cyan)
-          log(`export API_BASE_URL=http://localhost:4566/_aws/execute-api/${api.id}/Prod`, colors.cyan)
+          log(
+            `export API_BASE_URL=http://localhost:4566/_aws/execute-api/${api.id}/Prod`,
+            colors.cyan
+          )
         }
         return { success: true, apiId: apis.items[0].id }
       } else {
@@ -227,18 +233,25 @@ async function devMode() {
   if (await buildProject()) {
     if (await deployStack()) {
       log('🎉 Fresh deployment completed!', colors.green)
-      
+
       // Get API info for testing
       const apiInfo = await getApiInfo()
-      
+
       if (apiInfo.success) {
-        log('\n🔄 Starting sync mode for hot-reload development...', colors.blue)
-        log('💡 This will watch for changes and automatically sync your Lambda functions', colors.yellow)
+        log('='.repeat(50), colors.cyan)
+        log('🔄 Starting sync mode for hot-reload development...', colors.blue)
+        log('='.repeat(50), colors.cyan)
+        log(
+          '💡 This will watch for changes and automatically sync your Lambda functions',
+          colors.yellow
+        )
         log('⚠️  Press Ctrl+C to stop sync mode\n', colors.yellow)
-        
+
         // Start sync in foreground - this will block until interrupted
-        const syncResult = execCommand(`samlocal sync --region ${REGION} --stack-name ${STACK_NAME}`)
-        
+        const syncResult = execCommand(
+          `samlocal sync --region ${REGION} --stack-name ${STACK_NAME}`
+        )
+
         if (!syncResult.success) {
           log('❌ Sync mode failed to start', colors.red)
         }
@@ -329,4 +342,3 @@ switch (command) {
     log('Run "node localstack.mjs help" for usage information', colors.yellow)
     process.exit(1)
 }
-
