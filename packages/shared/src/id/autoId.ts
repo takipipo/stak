@@ -4,7 +4,7 @@ const contentSeed = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 const ONE_HOUR = 60 // in minutes
 const ONE_DAY = 24 * ONE_HOUR
-const ONE_YEAR = 366 * ONE_DAY // (including leap year)
+const ONE_YEAR = 365.25 * ONE_DAY // (including leap year)
 const TOTAL_YEAR_SUPPORT = 114 * ONE_YEAR
 const TOTAL_YEARS_IN_36_RADIX = TOTAL_YEAR_SUPPORT.toString(36).length // "zp500" (5 digits)
 const SECOND_UNIT_MAX = 60 * 1000 // 1 minute in milliseconds
@@ -31,7 +31,7 @@ export class AutoId {
         const elapsedInMins = Math.floor(elapsedInMs / SECOND_UNIT_MAX) % TOTAL_YEAR_SUPPORT
         const secondUnitInMs = elapsedInMs % SECOND_UNIT_MAX
         const prefix = elapsedInMins.toString(36).padStart(TOTAL_YEARS_IN_36_RADIX, '0') // 5 digits
-        const secondUnit = (secondUnitInMs / SECOND_UNIT_SCALE)
+        const secondUnit = Math.floor(secondUnitInMs / SECOND_UNIT_SCALE)
           .toString(36)
           .padStart(SECOND_UNIT_IN_36_RADIX, '0')
         return [prefix, secondUnit].join('').toUpperCase()
