@@ -1,4 +1,4 @@
-import { MethodNotAllowedError } from '@stak/shared'
+import { isStakError, MalformedRequestError, MethodNotAllowedError } from '@stak/shared'
 import type { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
 
 export interface HttpSuccessResult<T> {
@@ -101,9 +101,9 @@ export class HttpHandlerBuilder<R = {}> {
     regex?: RegExp
   ): HttpHandlerBuilder<R & Record<K, string>> {
     this.validations.push((r, e) => {
-      const pathVal = (e.pathParameters || {})[key as string]
+      const pathVal = (e.pathParameters || {})[key as string]?.toString()?.trim()
       if (!pathVal) {
-        throw new Error(`Path: ${key} is missing.`)
+        throw new MalformedRequestError(`Path: ${key} is missing.`)
       }
       ;(r as any)[key] = pathVal
     })
@@ -136,8 +136,12 @@ export class HttpHandlerBuilder<R = {}> {
         }
         return resp
       } catch (e) {
+        let statusCode = 500
+        if (isStakError(e)) {
+          statusCode = e.statusCode
+        }
         return {
-          statusCode: 500,
+          statusCode,
           body: JSON.stringify(_helpers.wrapToErrorResult(e as Error))
         }
       }

@@ -10,11 +10,17 @@
     "dynamodb-onetable": "^2.7.7"
   },
   "scripts": {
-    "dev": "sam local start-api --skip-pull-image",
-    "localstack:deploy": "npm run build && samlocal deploy --region us-east-1 --stack-name local",
-    "localstack:sync": "npm run build && samlocal sync --region us-east-1 --stack-name local",
-    "localstack:info": "awslocal apigateway get-rest-apis | jq '.items[] | \"http://localhost:4566/_aws/execute-api/\\(.id)/Prod/user/messages\"'",
-    "localstack:delete": "samlocal delete --region us-east-1 --stack-name local --no-prompts",
+    "dev": "node localstack.mjs dev",
+    "dev:local": "sam local start-api --skip-pull-image",
+    "localstack": "node localstack.mjs",
+    "localstack:status": "node localstack.mjs status",
+    "localstack:deploy": "node localstack.mjs deploy",
+    "localstack:sync": "node localstack.mjs sync",
+    "localstack:safe-deploy": "node localstack.mjs safe-deploy",
+    "localstack:fresh-deploy": "node localstack.mjs fresh-deploy",
+    "localstack:clean": "node localstack.mjs clean",
+    "localstack:info": "node localstack.mjs info",
+    "localstack:list-tables": "node localstack.mjs list-tables",
     "build": "sam build && sam validate",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },

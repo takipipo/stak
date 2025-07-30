@@ -33,6 +33,29 @@ Stak is an open-source inbox service application designed to handle mobile app m
 - `make status` - Check status of local services
 - `make clean` - Clean up build artifacts and containers
 
+### LocalStack Development Workflow
+- `npm run dev -w packages/stak` - 🚀 **Start development mode (fresh deploy + sync + API info)**
+- `npm run localstack:status -w packages/stak` - Show complete LocalStack status
+- `npm run localstack:safe-deploy -w packages/stak` - Check environment and deploy safely  
+- `npm run localstack:fresh-deploy -w packages/stak` - Clean everything and deploy fresh
+- `npm run localstack:sync -w packages/stak` - Sync for fast development iteration
+- `npm run localstack:clean -w packages/stak` - Clean stacks and tables
+- `npm run localstack:info -w packages/stak` - Show API Gateway endpoints with test variables
+
+### Direct Script Usage  
+- `cd packages/stak && node localstack.mjs dev` - 🚀 **Start development (most common)**
+- `cd packages/stak && node localstack.mjs status` - Quick status check
+- `cd packages/stak && node localstack.mjs help` - Show all available commands
+
+### Development Mode Features
+The `dev` command provides:
+- ✅ Clean environment (removes conflicting stacks/tables)
+- ✅ Fresh deployment with latest code
+- ✅ API Gateway ID extraction for testing
+- ✅ Environment variables for easy testing
+- ✅ Automatic sync mode for hot-reload development
+- ✅ Sample endpoint URLs ready to copy/paste
+
 ### AWS Deployment
 - `cd packages/stak && sam deploy` - Deploy Lambda functions to AWS
 - `cd packages/stak && sam deploy --guided` - Interactive deployment configuration
