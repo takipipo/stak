@@ -1,5 +1,5 @@
 import { AutoId, UserMessageModel } from '@stak/shared'
-import { HttpHandlerBuilder } from '../utils/http.lambda'
+import { HttpHandlerBuilder } from '../../utils/http.lambda'
 
 export const handler = new HttpHandlerBuilder()
   .useMethod('POST')
@@ -17,13 +17,14 @@ export const handler = new HttpHandlerBuilder()
     return { content, author, to, tenantKey }
   })
   .usePath('tenantKey')
+  .usePath('inboxKey')
   .useSuccessStatusCode(200)
   .run(async (i) => {
     // Creates a new item, or replaces an old item with a new item
     const m = await UserMessageModel.upsert({
       body: i.body.content,
       tenantKey: i.tenantKey,
-      inboxKey: 'DEFAULT',
+      inboxKey: i.inboxKey,
       messageId: AutoId.messageId.produce(),
       userId: i.body.to
     })

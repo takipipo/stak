@@ -123,6 +123,7 @@ Resources:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
   # This is a Lambda function config associated with the source code: put-item.js
+  # POST /stack/admin/v1/:tenant_key/:inbox_key/messages/post
   AdminPublishMessageFn:
     Type: AWS::Serverless::Function
     Metadata:
@@ -136,14 +137,12 @@ Resources:
         Sourcemap: true
         MainFields: "package.json"
         EntryPoints:
-        - admin-publish-message.ts
+        - v1-publish-message.ts
         External:
-        - "@aws-sdk/client-dynamodb"
-        - "@aws-sdk/lib-dynamodb"
-        - "@aws-sdk/util-dynamodb"
+        - "@aws-sdk/*"
     Properties:
-      CodeUri: src/handlers/
-      Handler: admin-publish-message.handler
+      CodeUri: src/handlers/admin/
+      Handler: v1-publish-message.handler
       Runtime: nodejs22.x
       Architectures:
       - x86_64
@@ -163,7 +162,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /admin/messages/{tenantKey}
+            Path: /admin/v1/{tenantKey}/{inboxKey}/messages/post
             Method: POST
   # Simple syntax to create a DynamoDB table with a single attribute primary key, more in
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlesssimpletable

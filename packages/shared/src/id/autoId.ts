@@ -4,7 +4,7 @@ const contentSeed = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 const ONE_HOUR = 60 // in minutes
 const ONE_DAY = 24 * ONE_HOUR
-const ONE_YEAR = 365 * ONE_DAY + 0.25 * ONE_DAY // (including leap year)
+const ONE_YEAR = 366 * ONE_DAY // (including leap year)
 const TOTAL_YEAR_SUPPORT = 114 * ONE_YEAR
 const TOTAL_YEARS_IN_36_RADIX = TOTAL_YEAR_SUPPORT.toString(36).length // "zp500" (5 digits)
 const SECOND_UNIT_MAX = 60 * 1000 // 1 minute in milliseconds
