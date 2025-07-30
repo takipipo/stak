@@ -105,6 +105,11 @@ export class HttpHandlerBuilder<R = {}> {
       if (!pathVal) {
         throw new MalformedRequestError(`Path: ${key} is missing.`)
       }
+      if (regex && pathVal.match(regex)) {
+        throw new MalformedRequestError(
+          `Path: ${key} does not matches the required pattern. ${regex.source}.`
+        )
+      }
       ;(r as any)[key] = pathVal
     })
     // TODO: Add Path Validation
