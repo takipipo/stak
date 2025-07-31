@@ -10,12 +10,11 @@
     "dynamodb-onetable": "^2.7.7"
   },
   "scripts": {
-    "dev": "node localstack.mjs dev",
+    "dev": "node localstack.mjs sync",
     "dev:local": "sam local start-api --skip-pull-image",
     "localstack": "node localstack.mjs",
     "localstack:status": "node localstack.mjs status",
     "localstack:deploy": "node localstack.mjs deploy",
-    "localstack:sync": "node localstack.mjs sync",
     "localstack:safe-deploy": "node localstack.mjs safe-deploy",
     "localstack:fresh-deploy": "node localstack.mjs fresh-deploy",
     "localstack:clean": "node localstack.mjs clean",

@@ -223,49 +223,6 @@ async function safeDeploy() {
   }
 }
 
-async function devMode() {
-  log('🚀 Development mode (fresh-deploy + sync)...', colors.cyan)
-  log('='.repeat(50), colors.cyan)
-
-  // First do a fresh deployment
-  await cleanEnvironment()
-
-  if (await buildProject()) {
-    if (await deployStack()) {
-      log('🎉 Fresh deployment completed!', colors.green)
-
-      // Get API info for testing
-      const apiInfo = await getApiInfo()
-
-      if (apiInfo.success) {
-        log('='.repeat(50), colors.cyan)
-        log('🔄 Starting sync mode for hot-reload development...', colors.blue)
-        log('='.repeat(50), colors.cyan)
-        log(
-          '💡 This will watch for changes and automatically sync your Lambda functions',
-          colors.yellow
-        )
-        log('⚠️  Press Ctrl+C to stop sync mode\n', colors.yellow)
-
-        // Start sync in foreground - this will block until interrupted
-        const syncResult = execCommand(
-          `samlocal sync --region ${REGION} --stack-name ${STACK_NAME}`
-        )
-
-        if (!syncResult.success) {
-          log('❌ Sync mode failed to start', colors.red)
-        }
-      } else {
-        log('❌ Could not get API Gateway information, but deployment succeeded', colors.yellow)
-        log('🔄 You can manually start sync with: npm run localstack:sync', colors.cyan)
-      }
-    } else {
-      log('❌ Deployment failed, aborting dev mode', colors.red)
-    }
-  } else {
-    log('❌ Build failed, aborting dev mode', colors.red)
-  }
-}
 
 function showHelp() {
   log('🚀 LocalStack Management Script', colors.cyan)
@@ -274,7 +231,6 @@ function showHelp() {
   log('')
   log('Commands:', colors.green)
   log('  status           Show current LocalStack status')
-  log('  dev              🚀 Fresh deploy + start sync mode (recommended for development)')
   log('  deploy           Deploy stack (same as sam deploy)')
   log('  sync             Sync stack for development')
   log('  safe-deploy      Check environment and deploy safely')
@@ -287,9 +243,9 @@ function showHelp() {
   log('  help             Show this help message')
   log('')
   log('Examples:', colors.yellow)
-  log('  node localstack.mjs dev          # 🚀 Start development (most common)')
+  log('  node localstack.mjs fresh-deploy # Fresh deployment')
+  log('  node localstack.mjs sync         # Sync for development')
   log('  node localstack.mjs status       # Check current state')
-  log('  node localstack.mjs fresh-deploy # Deploy without sync')
 }
 
 // Main execution
@@ -298,9 +254,6 @@ const command = process.argv[2]
 switch (command) {
   case 'status':
     await showStatus()
-    break
-  case 'dev':
-    await devMode()
     break
   case 'deploy':
     if (await buildProject()) {
