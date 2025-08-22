@@ -35,7 +35,7 @@ dev-start: ## Start LocalStack and related services
 	@echo "Starting LocalStack..."
 	npm run infra:local:up
 	@echo "Waiting for LocalStack to be ready..."
-	@until curl -s http://localhost:4566/health | grep -q "running"; do \
+	@until curl -s http://localhost:4566/_localstack/health | grep -q "running"; do \
 		echo "Waiting for LocalStack..."; \
 		sleep 2; \
 	done
