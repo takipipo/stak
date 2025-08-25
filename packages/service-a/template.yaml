@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  stak
+Transform:
+- AWS::Serverless-2016-10-31
+
+Parameters:
+  BaseInfraStackName:
+    Type: String
+    Default: stak-infra
+
+Resources:
+  HelloFn:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+        - .js=.mjs
+        Target: "es2020"
+        Sourcemap: true
+        MainFields: "package.json"
+        EntryPoints:
+        - hello.ts
+        External:
+        - "@aws-sdk/client-dynamodb"
+        - "@aws-sdk/lib-dynamodb"
+        - "@aws-sdk/util-dynamodb"
+    Properties:
+      CodeUri: src/handlers/
+      Handler: hello.handler
+      Runtime: nodejs22.x
+      FunctionName: !Sub "${AWS::StackName}-hello"
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: A simple example includes a HTTP get method to say hello.
+      LoggingConfig:
+        LogGroup: !Ref HelloFnLogGroup
+      Environment:
+        Variables:
+          DDB_TABLE_NAME: DummyTableName
+      #     NODE_OPTIONS: --enable-source-maps
+      #     SQS_MESSAGE_PUBLISHER_Q_URL: !Ref MessagePublisherQ
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /api/v1/hello
+            Method: GET
+
+  # This is a Lambda function config associated with the source code: get-by-id.js
+  PublishToSqsFn:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+        - .js=.mjs
+        Target: "es2020"
+        Sourcemap: true
+        MainFields: "package.json"
+        EntryPoints:
+        - publish-to-sqs.ts
+        External:
+        - "@aws-sdk/client-sqs"
+        - "@aws-sdk/client-dynamodb"
+        - "@aws-sdk/lib-dynamodb"
+        - "@aws-sdk/util-dynamodb"
+    Properties:
+      CodeUri: src/handlers/
+      Handler: publish-to-sqs.handler
+      Runtime: nodejs22.x
+      FunctionName: !Sub "${AWS::StackName}-publish-to-sqs"
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: A simple example includes a HTTP post method to publish a message to a SQS queue.
+      LoggingConfig:
+        LogGroup: !Ref PublishToSqsFnLogGroup
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName:
+              Fn::ImportValue:
+                Fn::Sub: "${BaseInfraStackName}-SharedQueueName"
+      Environment:
+        Variables:
+          DDB_TABLE_NAME: DummyTableName
+          SHARED_QUEUE_URL:
+            Fn::ImportValue:
+              Fn::Sub: "${BaseInfraStackName}-SharedQueueUrl"
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /api/v1/publish
+            Method: POST
+  PublishToSqsFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: "/aws/lambda/${AWS::StackName}-publish-to-sqs"
+      RetentionInDays: 14
+  HelloFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: "/aws/lambda/${AWS::StackName}-hello"
+      RetentionInDays: 14
+Outputs:
+  WebEndpoint:
+    Description: API Gateway endpoint URL for Prod stage
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+# # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Tracing: Active
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel: INFO
+      SystemLogLevel: INFO
+  Api:
+    TracingEnabled: true
