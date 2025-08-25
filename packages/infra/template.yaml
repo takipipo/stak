@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Stak Infrastructure
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Project name
+    Default: stak
+  BaseInfraStackName:
+    Type: String
+    Description: Stack name for infra
+    Default: stak-infra
+
+Resources:
+  SharedQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: stak-shared-queue
+      RedrivePolicy:
+        deadLetterTargetArn:
+          Fn::GetAtt:
+            - "SharedQueueDLQ"
+            - "Arn"
+        maxReceiveCount: 3
+      Tags:
+        - Key: ManagedBy
+          Value: SAM
+
+  SharedQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: stak-shared-queue-dlq
+      VisibilityTimeout: 300
+      Tags:
+        - Key: ManagedBy
+          Value: SAM
+
+Outputs:
+  SharedQueueUrl:
+    Value: !GetAtt  SharedQueue.QueueUrl
+    Export:
+      Name: !Sub "${AWS::StackName}-SharedQueueUrl"
+  SharedQueueName:
+    Value: !GetAtt  SharedQueue.QueueName
+    Export:
+      Name: !Sub "${AWS::StackName}-SharedQueueName"
+  SharedQueueArn:
+    Value: !GetAtt  SharedQueue.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-SharedQueueArn"
