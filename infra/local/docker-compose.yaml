@@ -11,7 +11,7 @@ services:
     environment:
       # LocalStack configuration
       - DEBUG=1
-      - SERVICES=dynamodb,apigateway,cloudformation,iam,lambda,sqs
+      - SERVICES=dynamodb,apigateway,cloudformation,iam,lambda,sqs,logs
       - DOCKER_HOST=unix:///var/run/docker.sock
       - START_WEB=0
       - PERSISTENCE=1
