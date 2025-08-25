@@ -1,0 +1,42 @@
+{
+  "name": "service-b",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.745.0",
+    "@stak/shared": "*"
+  },
+  "scripts": {
+    "dev": "node localstack.mjs sync",
+    "dev:local": "sam local start-api --skip-pull-image",
+    "localstack": "node localstack.mjs",
+    "localstack:status": "node localstack.mjs status",
+    "localstack:deploy": "node localstack.mjs deploy",
+    "localstack:safe-deploy": "node localstack.mjs safe-deploy",
+    "localstack:fresh-deploy": "node localstack.mjs fresh-deploy",
+    "localstack:clean": "node localstack.mjs clean",
+    "localstack:info": "node localstack.mjs info",
+    "localstack:list-tables": "node localstack.mjs list-tables",
+    "build": "sam build && sam validate",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.152",
+    "aws-sdk-client-mock": "^2.0.0",
+    "esbuild": "^0.25.8",
+    "jest": "^29.2.1"
+  },
+  "jest": {
+    "testMatch": [
+      "**/__tests__/**/*.[jt]s?(x)",
+      "**/?(*.)+(spec|test).[jt]s?(x)",
+      "**/__tests__/**/*.mjs?(x)",
+      "**/?(*.)+(spec|test).mjs?(x)"
+    ],
+    "moduleFileExtensions": [
+      "mjs",
+      "js"
+    ]
+  }
+}

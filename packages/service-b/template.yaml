@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  stak
+Transform:
+- AWS::Serverless-2016-10-31
+
+Parameters:
+  BaseInfraStackName:
+    Type: String
+    Default: stak-infra
+
+Resources:
+  SubscriberFn:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        Minify: false
+        OutExtension:
+        - .js=.mjs
+        Target: "es2020"
+        Sourcemap: true
+        MainFields: "package.json"
+        EntryPoints:
+        - sqs-to-subscribe.ts
+        External:
+        - "@aws-sdk/client-dynamodb"
+        - "@aws-sdk/lib-dynamodb"
+        - "@aws-sdk/util-dynamodb"
+    Properties:
+      CodeUri: src/handlers/
+      Handler: sqs-to-subscribe.handler
+      Runtime: nodejs22.x
+      FunctionName: !Sub "${AWS::StackName}-sqs-to-subscribe"
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: A simple example includes a HTTP get method to say hello.
+      LoggingConfig:
+        LogGroup: !Ref SubscriberFnLogGroup
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue:
+              Fn::ImportValue:
+                Fn::Sub: "${BaseInfraStackName}-SharedQueueArn"
+            BatchSize: 1
+  SubscriberFnLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: "/aws/lambda/${AWS::StackName}-sqs-to-subscribe"
+      RetentionInDays: 14
+
+Globals:
+  Function:
+    Tracing: Active
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel: INFO
+      SystemLogLevel: INFO
